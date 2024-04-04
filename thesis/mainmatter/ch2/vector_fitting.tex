@@ -1,0 +1,118 @@
+
+
+\section{Vector Fitting and Lossless Enforcement}\label{section:vector_fitting}
+We have covered all of the methods that we will need for synthesis and interconnection of rational impedance functions. However, our goal is to apply these methods to impedance functions obtained from electromagnetic simulations. In general, the immittance or scattering parameters obtained from electromagnetic simulation software (e.g. Ansys HFSS, COMSOL, Sonnet) will be discretized over frequency. We want to be able to obtain a rational function that approximates responses obtained from simulations.
+
+In this section, we will go over our process for approximating the discretized impedance with a lossless impedance function. In the first step of this process, we will use the method of vector fitting \cite{gustavsen_rational_1999}. Specifically, we use the ``Matrix Fitting Toolbox" MATLAB implementation available at \cite{matrix_fitting_toolbox} that uses the methods of \cite{gustavsen_rational_1999,gustavsen_improving_2006,deschrijver_macromodeling_2008}. Unfortunately, this first step does not provide a lossless model. Here, we go over the basic vector fitting method so we can see what needs to be done to obtain a lossless model from the traditional vector fitting result.
+
+To see how the vector fitting algorithm works, we consider a single port system with a scalar response function of the form:
+\begin{equation}\label{eq:scalar_rational}
+    H(s) = \sum_{n=1}^N \frac{r_n}{s-p_n} + d + se
+\end{equation}
+We assume that we want to fit to a set of data points $\{(s_k, \tilde{H}_k)\}$ that correspond to the above response function. The first step of the vector fitting method is to choose a set of starting poles $\bar{p}_n$ in our desired frequency range. The vector fitting method then relocates the starting poles until the algorithm converges. This iterative process uses a weighting function $\sigma(s)$:
+\begin{equation}\label{eq:weight_function}
+    \sigma(s) = 1 + \sum_{n=1}^N \frac{c_n}{s-\bar{p}_n}
+\end{equation}
+Then, for each frequency point in the set of data points, an approximation can be made using the starting poles:
+\begin{equation}\label{eq:vf_approx}
+    \sigma(s_k) \tilde{H}_k = \left(1 + \sum_{n=1}^N \frac{c_n}{s_k-\bar{p}_n}\right) \tilde{H}_k \approx \sum_{n=1}^N \frac{\bar{r}_n}{s_k-\bar{p}_n} + d + s_ke
+\end{equation}
+For more information on where this approximation comes from, see \cite{gustavsen_rational_1999}. Alternatively, we can see that the choice of the weighting function and corresponding iterative process is a Santhanan-Koerner iterative process where a set of partial fractions are used as basis functions rather than polynomials \cite[Chapter 7]{passive_macromodeling}. We can rewrite (\ref{eq:vf_approx}) in a more suggestive form:
+\begin{equation}
+    \left(\sum_{n=1}^N \frac{\bar{r}_n}{s_k-\bar{p}_n} + d + s_ke\right) - \tilde{H}_k\left(\sum_{n=1}^N \frac{c_n}{s_k-\bar{p}_n}\right) \approx \tilde{H}_k
+\end{equation}
+where we can now see that for the set of data points, the above equation defines an overdetermined set of equations $\vb{A} \vb{x} = \vb{b}$ with the rows of $\vb{A}$
+\begin{equation}
+    A_k = \mqty( \dfrac{1}{s_k-\bar{p}_1} & \dots & \dfrac{1}{s_k-\bar{p}_N} & 1 & s_k & -\dfrac{\tilde{H}_k}{s_k-\bar{p}_1} & \dots & -\dfrac{\tilde{H}_k}{s_k-\bar{p}_N} ),
+\end{equation}
+the vector of unknowns $\vb{x} = \mqty(\bar{r}_1 & \dots & \bar{r}_N & d & e & c_1 & \dots & c_N)$, and $b_k = \tilde{H}_k$. Solving this equation in the least-squares sense, we can obtain a set of residues for the current iteration. The zeros of the new weight function (\ref{eq:weight_function}) with the most recent residues $c_i$ will be used to define the next set of poles for the next iteration. The zeros of this weight function are the eigenvalues of the matrix $\vb{P} - \vb{o}\vb{c}^T$ where $\vb{P}$ is a diagonal matrix of the starting poles, $\vb{o}$ is a column vector of ones, and $\vb{c}$ is a row vector containing the residues $c_i$. Taking the zeros of $\sigma(s)$ as the new set of poles, we can iterate the above process until the found poles converge. At this point, the final set of poles can be inserted into (\ref{eq:scalar_rational}) and that equation can be solved in the least squares sense to obtain the final approximation of the residues. 
+
+The above method describes in general terms what the vector fitting iteration consists of, but the implementation of \cite{matrix_fitting_toolbox} makes use of an improved pole relocation method \cite{gustavsen_improving_2006} as well as a faster method that doesn't compute the residues $\bar{r}_i$ that are thrown away in the pole relocation process \cite{deschrijver_macromodeling_2008}. Furthermore, the above method can then be applied to multiport response functions (treated as vector functions) with the condition that all matrix elements have the same set of poles. This is precisely what we need for our rational impedance functions.
+
+While we can use the vector fitting methods discussed above to obtain a good rational approximation of our simulated impedance functions, the models obtained can not be immediately used to construct circuit Hamiltonians since the resulting function will not be lossless. Fitting to an $N$-port discretized impedance function, the vector fitting algorithm will provide a rational function of the form
+\begin{equation}
+    \vb{Z}(s) = \sum_{j=1}^{M} \left[ \frac{\vb{R}_j}{s-p_j} + \frac{\vb{R}_j^\ast}{s-p_j^\ast} \right]
+\end{equation}
+where $\vb{R_j} \in \mathbb{C}^{N \times N}$, $p_j \in \mathbb{C}$ and $\myRe(p_j) < 0$. Some poles from the vector fitting are real while others are complex. Since the poles and residues are allowed to be complex, a function from the vector fitting process is not necessarily passive or lossless. There are methods that can check and enforce the passivity of these rational functions \cite[Chapters 9 \& 10]{passive_macromodeling}, but we want a strictly lossless impedance function. A lossless model would have $\vb{R}_j \in \mathbb{C}^{N \times N}$ and $p_j=i\omega_j$ for $\omega_j \in \mathbb{R}$.
+
+\begin{figure}[h!]
+    \centering
+    
+    \resizebox{0.75\textwidth}{!}{
+    \begin{tikzpicture}[rotate=90, transform shape,
+        circ/.style={circle, draw, solid, fill=white, inner sep=0.75pt,
+                     label=#1,
+                     node contents={},
+                     },
+        every label/.append style = {inner sep=2pt, font=\footnotesize}
+                            ]
+        \draw[thick, white, fill=white!75!blue] (0,0.75) arc (90:170:0.75) -- (-2,0.130236) arc(90:270:0.130236) -- (-0.738606,-0.130236) arc(190:270:.75);
+
+        \draw[<->]   (-2.5,0) -- (.5,0) node[above, rotate=270] {${\scriptstyle\myRe(s)}$};
+        \draw[<-]   (0,-3) -- (0,-1.5) node[left, rotate=270] {$\phantom{\scriptstyle\myIm(s)}$};
+        \draw[<-] (0,3) -- (0,1.5);
+        \draw (0,-3) node[right, rotate=270] {${{{\scriptstyle\myIm(s)}}}$};
+
+        \node[fill=white] at (0,1.075) {\footnotesize $\approx$};
+        \node[fill=white, rotate=180] at (0,-1.075) {\footnotesize $\approx$};
+        \draw (0,1.5) -- (0,1.125);
+        \draw (0,0) -- (0,1.04);
+        \draw (0,-1.5) -- (0,-1.125);
+        \draw (0,0) -- (0,-1.04);
+
+        \draw[line width=0.5, black!40!green, -{Latex[length=3,width=3]}] (-1.5,0) -- (-0.035,0);
+        \draw[line width=0.5, black!40!green, -{Latex[length=3,width=3]}] (-.25,0.5) -- (-0.0156525,0.0313049);
+        \draw[line width=0.5, black!40!green, -{Latex[length=3,width=3]}] (-.25,-0.5) -- (-0.0156525,-0.0313049);
+        
+        \draw[red, fill=red] (-.5,0) circle (.05);
+        \draw[red, fill=red] (-1.5,0) circle (.05);
+        \draw[red, fill=red] (-.25,0.5) circle (.05);
+        \draw[red, fill=red] (-.25,-0.5) circle (.05);
+        
+        \draw[line width=0.5, black!40!green, -{Latex[length=3,width=3]}] (-.65,1.5) -- (-0.035, 1.5);
+        \draw[red, fill=red] (-.65,1.5) circle (.05);
+        \draw[blue, fill=blue] (0,1.5) circle (.05);
+        \draw[line width=0.5, black!40!green, -{Latex[length=3,width=3]}] (-.65,-1.5) -- (-0.035, -1.5);
+        \draw[red, fill=red] (-.65,-1.5) circle (.05);
+        \draw[blue, fill=blue] (0,-1.5) circle (.05);
+        
+        \draw[line width=0.5, black!40!green, -{Latex[length=3,width=3]}] (-.35,2) -- (-0.035, 2);
+        \draw[red, fill=red] (-.35,2) circle (.05);
+        \draw[blue, fill=blue] (0,2) circle (.05);
+        \draw[line width=0.5, black!40!green, -{Latex[length=3,width=3]}] (-.35,-2) -- (-0.035, -2);
+        \draw[red, fill=red] (-.35,-2) circle (.05);
+        \draw[blue, fill=blue] (0,-2) circle (.05);
+        
+        \draw[line width=0.5, black!40!green, -{Latex[length=3,width=3]}] (-.5,2.5) -- (-0.035, 2.5);
+        \draw[red, fill=red] (-.5,2.5) circle (.05);
+        \draw[blue, fill=blue] (0,2.5) circle (.05);
+        \draw[line width=0.5, black!40!green, -{Latex[length=3,width=3]}] (-.5,-2.5) -- (-0.035, -2.5);
+        \draw[red, fill=red] (-.5,-2.5) circle (.05);
+        \draw[blue, fill=blue] (0,-2.5) circle (.05);
+        
+        \draw[blue, fill=blue] (0,0) circle (.05);
+        
+    \end{tikzpicture}}
+
+    \caption{Pole relocation to obtain a lossless model. Poles within the shaded region get mapped to $s=0$ while the rest are shifted onto the imaginary axis.}
+    \label{fig:pole_relocation}
+\end{figure}
+
+As a first step to obtaining a lossless function from the result of the vector fitting, we can extract the real symmetric parts of the residues. Then, if we shift the poles so that they all lie on the imaginary axis, the function will be purely imaginary. Since we want an impedance function of the form (\ref{eq:impedance}), we require that we end up with a DC pole at $s=0$. The poles from the fit will be complex, so we need to properly choose which poles we want to correspond to the DC pole. A range can be defined as shown in Fig.\ \ref{fig:pole_relocation} so that real poles are mapped to $s=0$, and any complex poles close to $s=0$ are also included. The rest of the poles are mapped to the imaginary axis such that they correspond to resonant modes. Then we can define a new DC residue that is the sum of the residues for poles mapped to $s=0$. The DC residue should be positive definite, and the range for shifting poles to $s=0$ should be chosen such that this is the case. After doing this, we are left with a lossless function that comes from the vector fitting process. All residues at this point are also constrained to be symmetric so that we can make sure our final result is also reciprocal.
+
+Another problem we may encounter with the model from the vector fitting is that the residues of the resonant poles may not be rank-1 which is one of our requirements. To address this, we can split up each residue into a sum of rank-1 matrices that all correspond to the same pole. Using the eigendecomposition of a symmetric residue we can rewrite the matrix as:
+\begin{equation}
+    \vb{R} = \vb{Q}^T \vb{\Lambda} \vb{Q} = \sum_{n=1}^N (\vb{\Lambda})_{nn} \vb{q}^T_n \vb{q}^{\phantom{T}}_n
+\end{equation}
+where $\vb{q}_n$ is row $n$ of $\vb{Q}$, or in other words, $\vb{q}^T_n$ is the eigenvector corresponding to $(\vb{\Lambda})_{nn}$. The representation of the residue above shows us that if we do have a residue with general rank, we can always write it as a sum of rank-1 residues. The eigenvalues of the residue can also be used to gauge the weight of each of these rank-1 components. A threshold can then be set for the eigenvalue weight that is used to remove components that are small enough. Generally, if the pole is clearly visible in the frequency range of the discretized impedance function, the residue of the corresponding pole present in the vector fitting will be approximately rank-1. If the pole is outside of this frequency range, it is more likely that the vector fitting will return general rank residues.
+
+After the above process, we will have transformed the rational impedance from the vector fitting into a lossless function. This comes at the cost of the new lossless function being a worse approximation of the original impedance. We can then finally apply a separate curve fitting process with the lossless part of the vector fit result as the intial guess. In this curve fitting process, the parameters of our function are the poles and residues of the impedance. For the DC residue parameters, we can use the upper triangular part of the matrix, and after each iteration of the fitting, we can check if the matrix is still positive definite. If the right poles from the vector fit result are chosen and shifted to $s=0$, this DC residue should remain positive definite at the end of this secondary fitting process. For each of the resonant residues, we only need to fit a row vector of turns ratios since we have made sure that these residues are rank-1. The resonant residues need to be positive semidefinite, which means that the turns ratios are allowed to be any real number. You can see this explicitly if you look at an arbitrary turns ratio row vector $\vb{r}_k$ containing any real numbers. The corresponding rank-1 residue $\vb{R}_k = \vb{r}_k^T \vb{r}_k$ will have one eigenvalue $\lambda_k$ such that
+\begin{equation}
+    \lambda_k = \Tr(\vb{R}_k) = \Tr(\vb{r}_k^T \vb{r}_k) = \vb{r}_k\vb{r}_k^T \geq 0
+\end{equation}
+In this secondary curve fitting, we also fit against the $\log$ of the magnitude of both the Z and S-parameters to make sure that the final rational function is as close as possible to the original impedance function. Using the $\log$ makes sure that the fitting process can accurately fit low magnitude features in the Z and S- parameters. Putting all of the above together, we have the following process for obtaining our lossless impedance function from simulation data:
+\begin{enumerate}
+    \item Use the traditional vector fitting method to obtain a rational impedance function that approximates the discretized impedance.
+    \item Extract the real symmetric part of the residues for the result from the vector fitting and shift the poles onto the imaginary axis. Combine the set of residues corresponding to the poles close to $s=0$ into a DC residue and make sure that this is positive definite.
+    \item Apply a secondary fitting process to the lossless model extracted from the vector fitting result to obtain a lossless impedance function that well approximates the original discretized impedance.
+\end{enumerate}

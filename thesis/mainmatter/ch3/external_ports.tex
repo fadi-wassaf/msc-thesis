@@ -1,0 +1,142 @@
+
+\section{External Ports and Qubit Decay Rates}\label{section:ext_ports_decay}
+Here, we will look at the effects of external ports in our system that are separate from the ports shunted by Josephson junctions as shown in Fig.\ \ref{fig:transmon_network_ext_ports}. Given the rational impedance function, we can view the network as a CL cascade as previously discussed in Section \ref{section:cascade_synthesis}. This means that we can already estimate the capacitive coupling between the external ports and the qubits. This method can potentially be used when considering designs with combined microwave and flux lines \cite{combined_xyz_line,karamlou2023probing,Moskalenko2022}. Having the capacitive coupling of the lines to the qubits allows us to investigate the control crosstalk between the different lines. Further details on estimating this crosstalk from the impedance function are given in \cite{solgun_sirf,sherbrooke_sirf}.
+
+\begin{figure}[!p]
+    \centering
+    \begin{circuitikz}[line width=1pt]
+        \ctikzset{bipoles/thickness=1, bipoles/length=1cm}
+        \ctikzset { label/align = straight }
+        
+        % ----------------------------- Impedance Network ---------------------------- %
+        \draw[rounded corners=.5cm] (0,2) -- (0,4.5) -- (5,4.5) -- (5,-4.5) -- (0,-4.5) -- (0,2);
+        \node at (2.5,0) {$\vb{Z}(s) = \dfrac{\vb{R}_0}{s} + \displaystyle\sum_{k=1}^M \dfrac{s \vb{R}_k}{s^2 + \omega_{R_k}^2}$};
+
+        % --------------------------- Left Lower Qubit Port -------------------------- %
+        \draw (0,0.5) to[short, -o] (-0.5,0.5) -- (-1, 0.5) to[barrier=$E_{J_N}$] (-1,1.5) to[short, -o] (-0.5,1.5) -- (0,1.5);
+
+        % --------------------------- Left Upper Qubit Port -------------------------- %
+        \draw (0,3) to[short, -o] (-0.5,3) -- (-1, 3) to[barrier=$E_{J_1}$] (-1,4) to[short, -o] (-0.5,4) -- (0,4);
+
+        \node at (-0.5,2.35) {$\vdots$};
+
+        % ------------------------- Left Upper External Port ------------------------- %
+        \draw (0,-0.5) to[short,-o] (-0.5,-0.5);
+        \draw (0,-1.5) to[short,-o] (-0.5,-1.5);
+        \node at (-1,-1) {$P_{E_1}$};
+
+        % ------------------------- Left Lower External Port ------------------------- %
+        \draw (0,-3) to[short,-o] (-0.5,-3);
+        \draw (0,-4) to[short,-o] (-0.5,-4);
+        \node at (-1,-3.5) {$P_{E_{K}}$};
+        
+        \node at (-0.5,-2.15) {$\vdots$};
+
+    \end{circuitikz}
+    \caption{Network of $N$ transmons represented by an arbitrary impedance function (\ref{eq:impedance}). Like before, the transmons and external ports are coupled capacitively and through resonant modes. Now included are any external ports of the system. This may include drive, flux, and readout lines. $K$ is the number of external ports.}
+    \label{fig:transmon_network_ext_ports}
+\end{figure}
+
+\begin{figure}[!p]
+    \centering
+    \begin{circuitikz}[line width=1pt]
+        \ctikzset{bipoles/thickness=1, bipoles/length=1cm}
+        \ctikzset { label/align = straight }
+        
+        % ---------------------------- Capacitive Network ---------------------------- %
+        \draw[rounded corners=.5cm] (0,2) -- (0,9.5) -- (3,9.5) -- (3,0) -- (0,0) -- (0,2);
+        \node at (1.5,4.75) {\Large $\vb{C}$};
+
+        % --------------------------- Inductive Network Box -------------------------- %
+        \draw[rounded corners=0.5cm] (4,4) -- (4,7) -- (6,7) -- (6,2.5) -- (4,2.5) -- (4,4);
+        \draw (4, 5.5) -- (4.6,5.5) to[L,l_=$L_{R_1}$, mirror, label distance=0.25cm] (4.6,6.5) -- (4,6.5);
+        \draw (4,3) -- (4.6,3) to[L,l_=$L_{R_M}$, mirror, label distance=0.25cm] (4.6,4) -- (4,4);
+
+        % ----------------------------- Left Qubit 1 Port ---------------------------- %
+        \draw (0,8) to[short, -o] (-0.5,8) -- (-0.5,8) -- (-1,8) to[L=$L_{J_1}$] (-1, 9) to[short, -o] (-0.5,9) -- (0,9);
+        \draw (-1,8) to[short, -o] (-2.5,8);
+        \draw (-1,9) to[short, -o] (-2.5,9);
+
+        % ----------------------------- Left Qubit N Port ---------------------------- %
+        \draw (0,5.5) to[short, -o] (-0.5,5.5) -- (-1,5.5) to[L=$L_{J_N}$] (-1, 6.5) to[short, -o] (-0.5,6.5) -- (0,6.5);
+        \draw (-1,5.5) to[short, -o] (-2.5,5.5);
+        \draw (-1,6.5) to[short, -o] (-2.5,6.5);
+
+        % ------------------------------ Left Drive N_D Port ----------------------------- %
+        {
+        \ctikzset{bipoles/thickness=1, bipoles/length=.75cm}
+        \draw (0,1.5) to[short, -o] (-0.5,1.5) -- (-1,1.5) to[R, l_=$Z_{E_K}$] (-1, .5) to[short, -o] (-0.5, .5) -- (0,0.5);
+        \draw (-1,1.5) to[short, -o] (-2.5,1.5);
+        \draw (-1,0.5) to[short, -o] (-2.5,0.5);
+        }
+
+        % ------------------------------ Left Drive 1 Port ----------------------------- %
+        {
+        \ctikzset{bipoles/thickness=1, bipoles/length=.75cm}
+        % \draw (0,3) to[short, -o] (-0.5,3);
+        \draw (0,4) to[short, -o] (-0.5,4) -- (-1,4) to[R, l_=$Z_{E_1}$] (-1, 3) to[short, -o] (-0.5, 3) -- (0,3);
+        % \draw  (-0.5,4) -- (-1,4) to[R, l_=$Z_1$] (-1, 3) -- (-0.5, 3); 
+        \draw (-1,4) to[short, -o] (-2.5,4);
+        \draw (-1,3) to[short, -o] (-2.5,3);
+        }
+
+        % ----------------------------- Right Lower Port ---------------------------- %
+        \draw (3,3) to[short, -o] (3.5,3) -- (4,3);
+        \draw (3,4) to[short, -o] (3.5,4) -- (4,4);
+
+        % ----------------------------- Right Upper Port ---------------------------- %
+        \draw (3,5.5) to[short, -o] (3.5,5.5) -- (4,5.5);
+        \draw (3,6.5) to[short, -o] (3.5,6.5) -- (4,6.5);
+
+        \node at (-0.5,2.35) {$\vdots$};
+        \node at (-0.5,4.85) {$\vdots$};
+        \node at (-0.5,7.35) {$\vdots$};
+        % \node at (-0.5,2.35) {$\vdots$};
+        \node at (3.5,4.85) {$\vdots$};
+        \node at (5,4.85) {$\vdots$};        
+    \end{circuitikz}
+    \caption{Classical approximation to the circuit in Fig.\ \ref{fig:transmon_network_ext_ports} but now with the lossy environments represented by resistors shunting the external ports. The resistors should match the characteristic impedances of the external ports. The impedance function (\ref{eq:impedance}) has also been replaced with its equivalent CL cascade synthesis that is described in Section \ref{section:cascade_synthesis}. This circuit will have a lossy multiport immittance parameter that can be used to estimate qubit decay rates.}
+    \label{fig:lossy_transmon_network}
+\end{figure}
+
+Our main concern in this section is to estimate the relaxation times of the qubits. In our analysis of the relaxation time, we will only be concerned with spontaneous emission through the circuit around the qubit to the external environment, which is also referred to as Purcell decay \cite{purcell}. In other words, the external ports shown in Fig.\ \ref{fig:transmon_network_ext_ports} will be the loss channels. In this analysis we will be neglecting other loss through channels such as two-level systems in dielectrics \cite{dielectric_loss_1,dielectric_loss_2}, non-equilibrium quasiparticles \cite{quasiparticles_transmons}, as well as many more \cite{disentangling_losses}. The goal here is to be able to estimate losses that come from the design of the circuit itself.
+
+\newpage
+In circuits with single qubits, there is a commonly used method where a single-port admittance is defined that is external to the qubit. Then, a classical approximation of the qubit lifetime is given by the $RC$ time:
+\begin{equation}\label{eq:single_qubit_decay}
+    T_1 = \frac{C_q}{\myRe[Y(\omega_q)]}
+\end{equation}
+where $C_q$ is the total qubit shunt capacitance and $\omega_q$ is the qubit frequency \cite{transformed_dissipation,controlling_spontaneous_emission,suppressing_spontaneous_emission,reducing_spontaneous_emission}. It is generally implied that you can do something similar for multi-qubit systems \cite{controlling_spontaneous_emission}. Later on, we explain how a similar formula to (\ref{eq:single_qubit_decay}) can potentially be used to approximate the qubit relaxation times in multi-qubit systems.
+
+If we consider that we have a network of qubits as shown in Fig.\ \ref{fig:transmon_network_ext_ports}, we know that the rational impedance function can also be synthesized as a CL cascade circuit as described in Section \ref{section:cascade_synthesis}. We can treat the circuit past the ports as a purely resistive environment by shunting each external port with a resistor. This resistor should have an impedance that matches the characteristic impedance of the corresponding port. To find the relaxation times of the qubit modes, we make use of a classical approximation where the Josephson junctions are replaced by inductors. The full circuit with the impedance function replaced with the equivalent CL cascade is shown in Fig.\ \ref{fig:lossy_transmon_network}. 
+
+Before attempting to compute the decay rates of the qubit modes, we first try to compute the resonant frequencies of the lossless circuit that excludes the resistors in Fig.\ \ref{fig:lossy_transmon_network}. To do this, we define the following vector of fluxes and the inverse inductance matrix:
+\begin{align}
+    \vb{\Phi} &= (\Phi_{J_1},\dots,\Phi_{J_N},\Phi_{E_1},\dots,\Phi_{E_K},\Phi_{R_1},\dots,\Phi_{R_M})^T \\[.1cm]
+    \vb{M} &= \diag(L_{J_1}^{-1},\dots,L_{J_N}^{-1},\underbrace{0,\dots,0,}_{K} L_{R_1}^{-1},\dots,L_{R_M}^{-1})
+\end{align}
+The equations of motion for the branch fluxes of the lossless circuit including the qubit inductances are given by:
+\begin{equation}\label{eq:lossless_eom}
+    \vb{C}\ddot{\vb{\Phi}} = -\vb{M}\vb{\Phi}
+\end{equation}
+Diagonalizing the matrix $\vb{C}^{-1}\vb{M}$ will give the resonant frequencies squared of the circuit without the resistors. These equations of motion are equivalent to Kirchhoff's current law for the full circuit. Now we aim to include the resistors at the external port positions. For this, we define the matrix 
+\begin{equation}
+    \vb{Z} = \diag(\underbrace{0,\dots,0,}_{N}Z_{E_1},\dots,Z_{E_K},\underbrace{0,\dots,0}_{M})
+\end{equation}
+To include the resistors at each external port branch, we add an additional constraint to (\ref{eq:lossless_eom}) that yields the equations of motions for the lossy circuit in Fig.\ \ref{fig:lossy_transmon_network}:
+\begin{equation}\label{eq:lossy_eom}
+    \vb{C}\ddot{\vb{\Phi}} = -\vb{M}\vb{\Phi} - \vb{Z}^{-1}\dot{\vb{\Phi}} \quad\longrightarrow\quad \ddot{\vb{\Phi}} + \vb{C}^{-1}\vb{Z}^{-1}\dot{\vb{\Phi}} + \vb{C}^{-1}\vb{N}\vb{\Phi} = 0
+\end{equation}
+From this system of second order differential equations, we want to extract the complex frequencies that contain the resonant frequencies in our circuit with their corresponding decay rates. To do this, we can define the branch voltage vector $\vb{V} = \dot{\vb{\Phi}}$. Using this definition and writing it in matrix form with the equations of motion (\ref{eq:lossy_eom}), we obtain:
+\begin{equation}\label{eq:matrix_eoms}
+    \mqty( \dot{\vb{\Phi}}  \\ \dot{\vb{V}} ) = \mqty( \vb{0} & \mathds{1} \\ -\vb{C}^{-1}\vb{M} & -\vb{C}^{-1}\vb{Z}^{-1} ) \mqty( \vb{\Phi}  \\ \vb{V} )
+\end{equation} 
+Diagonalizing the matrix on the RHS of (\ref{eq:matrix_eoms}) will yield a set of complex conjugate eigenvalue pairs that correspond to the resonant modes in the circuit. These eigenvalues will also be the poles of the multiport impedance function shown in Fig.\ \ref{fig:lossy_transmon_network} which we will later verify numerically in Section \ref{section:decay_rate_example}. Adding the resistors to the network shifts the poles of the impedance function away from the imaginary axis, and they will be of the form:
+\begin{equation}\label{eq:lossy_pole}
+    s_i = -\frac{\kappa_i}{2} \pm i\omega_i
+\end{equation}
+where $\kappa_i$ is the decay rate of the resonant mode with frequency $\omega_i$. Thus, given a qubit network represented by a rational impedance function or a CL cascade, we can construct the matrix in (\ref{eq:matrix_eoms}), diagonalize it, and extract the decay rates of the qubits. Later on, we will see that if one computes the admittance of the lossy network in Fig.\ \ref{fig:lossy_transmon_network}, the qubit decay rates can be approximated by 
+\begin{equation}\label{eq:qubit_decay_admittance}
+    \Gamma_{J_i} = \tilde{C}_{J_i}^{-1} \myRe(\vb{Y}_{ii}(\omega_{J_i}))
+\end{equation}
+where the effective qubit capacitance $\tilde{C}_{J_i}$ is defined as in (\ref{eq:effective_capacitiance}). Computing this admittance is straightforward if we cascade the shunt elements with the original impedance and make use of (\ref{eq:cascade_s}) with the proper conversions between S, Y, and Z. If the full capacitance matrix is not available, we can also use the normal qubit shunt capacitance $C_{J_i}$ to approximate the decay rates. This can be useful if we only have an immittance function discretized in frequency.

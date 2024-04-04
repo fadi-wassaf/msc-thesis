@@ -1,0 +1,15 @@
+\newcommand{\opa}{\hat{a}^{\phantom{\dagger}}}
+\newcommand{\opb}{\hat{b}^{\phantom{\dagger}}}
+\newcommand{\opad}{\hat{a}^{\dagger}}
+\newcommand{\opbd}{\hat{b}^{\dagger}}
+
+\chapter[Analysis of Impedance Functions of Qubit Networks]{Analysis of Impedance Functions\\ of Qubit Networks}
+\label{chapter:analysis_impedance}
+
+We will now see how a rational impedance function can be used to construct and analyze a circuit Hamiltonian of a superconducting multi-qubit circuit. Here we will primarily be focused on networks of transmon qubits \cite{transmon}. With the resulting Hamiltonian, we can estimate coupling rates between the qubits and resonators. We will also take this further and estimate effective qubit coupling rates that are mediated by resonant modes and tunable couplers, as well as shifts in the qubit and resonator frequencies. Finally, by including external ports (drive, readout, flux, etc.) in the impedance, we show how to estimate Purcell decay rates of the qubits.
+
+While the focus here is on transmons, using the impedance to create circuit Hamiltonians can be extended to other qubit types (e.g. fluxonium \cite{fluxonium}). This is because you can obtain the multiport impedance of the linear part of the network and later on add Jospephson junctions or other lumped elements at the ports where they would be located in your circuit, just like we will do with the transmon circuits.
+
+\input{mainmatter/ch3/transmon_network_hamiltonian.tex}
+\input{mainmatter/ch3/external_ports.tex}
+

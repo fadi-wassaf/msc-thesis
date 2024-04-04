@@ -1,0 +1,222 @@
+
+\section{General Network Interconnection}\label{section:general_network_interconnection}
+Interconnecting circuit networks will allow us to efficiently build large models of qubit networks out of smaller and simpler pieces. Many methods do exist for interconnecting networks, but for the most part, these methods are limited to specific configurations (series, parallel, cascade) for immittance or scattering parameters that are discretized in frequency \cite[Chapter 3.3]{newcomb}. There are methods that allow you to interconnect state-space representations but they are also limited to the configurations mentioned \cite[Chapter 3.7.1]{passive_macromodeling}. What we are interested in is the general interconnection of rational impedance functions that at the end gives another rational impedance function. By ``general'', we mean that we want to be able to pick and choose arbitrary and direct connections between two-terminal ports. A method for doing this has not previously been found, but here we present how this can be done for the impedance function (\ref{eq:impedance}).
+
+\subsection{Rational Impedance Interconnection}\label{section:rational_impedance_interconnection}
+To interconnect rational impedance functions, we can make use of the CL cascade synthesis presented in Section (\ref{section:cascade_synthesis}). Since we know that these impedance functions can be synthesized as a CL cascade, interconnecting the ports becomes a problem of interconnecting multiple capacitance networks.
+
+\definecolor{connectcolor}{HTML}{2098b0}
+\begin{figure}[h!]
+    \centering
+    \begin{circuitikz}[line width=1pt]
+    \ctikzset{bipoles/thickness=1, bipoles/length=1cm}
+    \ctikzset{bipoles/crossing/size=0.5}
+    \ctikzset { label/align = straight }
+
+    % -------------------------- Center Port Connections ------------------------- %
+    \draw[connectcolor] (5,2.75) -- (7,2.75);
+    \draw[connectcolor] (5,1.75) -- (7,1.75);
+    \draw[connectcolor] (5.5,2.75) -- (5.5,2) to[crossing, color=connectcolor, mirror] (5.5,1.5) to[short, -o, color=connectcolor] (5.5,1);
+    \draw[connectcolor] (6.5,1.75) to[short, -o, color=connectcolor] (6.5,1);
+
+    % -------------------------- Right Port Connections -------------------------- %
+    \draw[rounded corners=.5cm, connectcolor] (12.5,3) -- (13, 3) -- (13,.5) -- (12.5,.5);
+    \draw[rounded corners=.5cm, connectcolor] (12.5,4) -- (13.75, 4) -- (13.75,1.5) -- (13.25,1.5);
+    \draw[connectcolor] (13.25, 1.5) to[crossing, color=connectcolor, mirror] (12.75,1.5) -- (12.5,1.5);
+    \draw[connectcolor] (13,1) to[short, -o, color=connectcolor] (14.5,1);
+    \draw[connectcolor] (13.75, 2) to[short, -o, color=connectcolor] (14.5, 2);
+
+
+    % -------------------------------- C1 Network -------------------------------- %
+    \draw[rounded corners=.5cm] (0,2) -- (0,4.5) -- (4.5,4.5) -- (4.5,0) -- (0,0) -- (0,2);
+    \node at (2.25,2.25) {\LARGE $\vb{C}_1$};
+
+    % Left Ports
+    \draw (0,0.5) to[short, -o] (-0.5,0.5);
+    \draw (0,1.5) to[short, -o] (-0.5,1.5);
+    \draw (0,3) to[short, -o] (-0.5,3);
+    \draw (0,4) to[short, -o] (-0.5,4);
+    \node at (-0.25,2.35) {$\vdots$};
+
+    % Center Port
+    \draw (4.5,2.75) to[short, -o] (5,2.75);
+    \draw (4.5,1.75) to[short, -o] (5,1.75);
+
+    % Inductors
+    \draw (0.5,4.75) -- (0.5,5) to[L] (1.5,5) -- (1.5,4.75);
+    \draw (0.5,4.5) to[short,-o] (0.5,4.75);
+    \draw (1.5,4.5) to[short,-o] (1.5,4.75);
+    \draw (3,4.75) -- (3,5) to[L] (4,5) -- (4,4.75);
+    \draw (3,4.5) to[short,-o] (3,4.75);
+    \draw (4,4.5) to[short,-o] (4,4.75);
+    \node at (2.25, 4.75) {$\dots$};
+
+    % -------------------------------- C2 Network -------------------------------- %
+    \draw[rounded corners=.5cm] (7.5,2) -- (7.5,4.5) -- (12,4.5) -- (12,0) -- (7.5,0) -- (7.5,2);
+    \node at (9.75,2.25) {\LARGE $\vb{C}_2$};
+
+    % Right Ports
+    \draw (12,0.5) to[short, -o] (12.5,0.5);
+    \draw (12,1.5) to[short, -o] (12.5,1.5);
+    \draw (12,3) to[short, -o] (12.5,3);
+    \draw (12,4) to[short, -o] (12.5,4);
+    % \node at (12.25,2.35) {$\vdots$};
+
+    % Center Port
+    \draw (7.5,2.75) to[short, -o] (7,2.75);
+    \draw (7.5,1.75) to[short, -o] (7,1.75);
+
+    % Inductors
+    \draw (8,4.75) -- (8,5) to[L] (9,5) -- (9,4.75);
+    \draw (8,4.5) to[short,-o] (8,4.75);
+    \draw (9,4.5) to[short,-o] (9,4.75);
+    \draw (10.5,4.75) -- (10.5,5) to[L] (11.5,5) -- (11.5,4.75);
+    \draw (10.5,4.5) to[short,-o] (10.5,4.75);
+    \draw (11.5,4.5) to[short,-o] (11.5,4.75);
+    \node at (9.75, 4.75) {$\dots$};
+
+\end{circuitikz}
+\caption{Interconnection between ports of CL cascade networks. We can have interconnection between two ports in disjoint or connected capacitance networks. Note that we can make the interconnection by defining a new port that connects two existing ports. The port can then be ``left open'' to complete the interconnection.}
+\label{fig:interconnect_visual}
+\end{figure}
+
+In Fig.\ \ref{fig:interconnect_visual}, we show how interconnections are defined between the two-terminal ports. Our interconnection method will work for connecting disjoint CL cascades as well as connecting 2 ports within the same cascade. The interconnection is created by forming a new port that connects two existing ports. The interconnection process is effectively completed if the new port is ``left open" which will be addressed later. Fig.\ \ref{fig:interconnect_visual} clearly shows that when performing interconnections of ports for a single or multiple CL cascade networks, the new network is also a CL cascade. This means that interconnecting CL cascades that are synthesized from impedance functions results in a CL cascade network. We can then find the rational impedance function of the interconnected CL cascade using the method of Section \ref{section:cascade_analysis}.
+
+\begin{figure}[h!]
+    \centering
+    \begin{circuitikz}[line width=1pt]
+    \ctikzset{american}
+    \ctikzset{bipoles/thickness=1, bipoles/length=1cm}
+    \ctikzset{bipoles/crossing/size=0.5}
+    \ctikzset { label/align = straight }
+
+    % Cross capacitance
+    \draw[nodecolor] (-3,2) -- (-3,3) to[C, color=nodecolor] (3,3) -- (3,2);
+    
+    % -------------------------------- Connection -------------------------------- %
+    \draw[connectcolor] (-1.5, 0.5) -- (1.5,0.5);
+    \draw[connectcolor] (-1.5, 2) -- (1.5, 2);
+    \draw[connectcolor] (0.5, 0.5) to[short, -o, color=connectcolor] (0.5,-0.5);
+    \draw[connectcolor] (-0.5, 2) -- (-0.5, 0.75) to[crossing, color=connectcolor, mirror] (-0.5,0.25) to[short, -o,color=connectcolor] (-0.5,-0.5);
+
+    % -------------------------- Left capacitive network ------------------------- %
+    \draw (-3.028,0.5) to[short, -o] (-1.5,0.5);
+    \draw (-1.5,2) to[short, o-] (-3.5,2) to[C] (-5.5,2);
+    {
+        \ctikzset{bipoles/thickness=1.5, bipoles/length=1cm}
+        \draw[ultra thick] (-3,2) to[C] (-3,0.5);
+    }
+
+    % ------------------------- Right capacitive network ------------------------- %
+    \draw (3.028,0.5) to[short, -o] (1.5,0.5);
+    \draw (1.5,2) to[short, o-] (3.5,2) to[C] (5.5,2);
+    {
+        \ctikzset{bipoles/thickness=1.5, bipoles/length=1cm}
+        \draw[ultra thick] (3,2) to[C] (3,0.5);
+    }
+
+    \node[circle, fill=black, inner sep=0pt, minimum size=5pt] at (-3,2) {};
+    \node[circle, fill=black, inner sep=0pt, minimum size=5pt] at (3,2) {};
+
+    \node at (6,2) {\dots};
+    \node at (-5.925,2) {\dots};
+    \node at (-4.5,1.35) {\vdots};
+    \node at (4.5,1.35) {\vdots};
+
+\end{circuitikz}
+\caption{Example interconnection of two ports for a capacitive network. Each port node can be capacitively coupled to multiple other ports (not shown). The shunt capacitance of the new port is the sum of the bold capacitances at the old ports. The red capacitance between the ports has a direct shunt across it and thus plays no role in the interconnected circuit.}
+\label{fig:cap_interconnect}
+\end{figure}
+
+The central part of the interconnection procedure described above is the interconnection of the capacitance matrices. To see how this interconnection happens, we can look at the example in Fig.\ \ref{fig:cap_interconnect}. We immediately see that the shunt capacitance of the newly created port is just the sum of the capacitances shunting the old ports (shown in bold). Then, we also have that the capacitive couplings between the two newly connected ports to any other ports are added together. If there is a direct capacitive coupling between the two connected ports (as shown in red), it is then neglected since there is a short across it and which means the capacitance plays no role in the new network.
+
+Using the rules discussed, we can go over the whole procedure. To generally interconnect $N$ rational impedance functions, we consider the cascade synthesis of each. So for each impedance function $\vb{Z}_i$ we have a corresponding Maxwell capacitance matrix $\vb{C}_i$ and a set of shunt inductors that do not affect the interconnection of the capacitance matrices. Each of these capacitance matrices has the form:
+\begin{equation}
+    \vb{C}_i = \mqty(\vb{C}_{i,P} & \vb{C}_{i,PR} \\ \vb{C}_{i,PR}^T & \vb{C}_{i,R} )
+\end{equation}
+Before interconnecting the networks, we first construct the capacitance network for the entire disconnected network:
+\begin{equation}
+    \vb{C} = \mqty( 
+        \vb{C}_{1,P} & & \vb{0}& \vb{C}_{1,PR} & & \vb{0} \\
+        & \ddots & & & \ddots & \\
+        \vb{0}& & \vb{C}_{N,P} & \vb{0} & & \vb{C}_{N,PR} \\
+        \vb{C}_{1,PR}^T & & \vb{0} & \vb{C}_{1,R} & & \vb{0}\\
+        & \ddots & & & \ddots & \\
+        \vb{0}& & \vb{C}_{N,PR}^T & \vb{0} & & \vb{C}_{N,R}
+     )
+\end{equation}
+The upper left $P$-block corresponds to the ports of the impedance functions. This new capacitance matrix is constructed in a way such that the lower right $R$-block has the ports that are shunted by the sets of inductances for each individual CL cascade. To interconnect various ports of the impedance functions, we can perform some operations on the rows and columns that belong to the $P$-block of $\vb{C}$. After constructing $\vb{C}$, we can interconnect two ports $j$ and $k$ corresponding to rows or columns in the $P$-block with the following set of steps:
+\begin{enumerate}
+    \item Add row $k$ of $\vb{C}$ to row $j$. Choosing to add to row $j$ makes it so that this row will correspond to the newly formed port.
+    \item Add column $k$ of $\vb{C}$ to column $j$. This step properly combines the shunt capacitances of the two ports in parallel.
+    \item Delete row and column $k$ from $\vb{C}$.
+\end{enumerate}
+The newly formed $\vb{C}$ corresponds to the network with one port less than it started with, but now a port exists that combines the previous two ports. These row and column operations properly combine all the parallel capacitances that are present after interconnecting the two ports. After interconnecting all the port pairs needed, the method of Section (\ref{section:cascade_analysis}) can be used to obtain the rational impedance function for the new network that includes the new connection ports. Finally, you can ``leave the extra ports open'' in this final impedance function by deleting the rows and columns of the residues corresponding to these open ports. After this step, the interconnection process is done and you are left with the rational impedance function of the fully interconnected network.
+
+\subsection{General S Parameter Interconnection}\label{section:s_interconnection}
+
+Sometimes we may not have, or may not want, to find the rational impedance function of a network and therefore cannot use the above method for interconnection. While we will also explore how we can obtain the rational function from an impedance discretized over frequency, it is also useful to have a method for interconnecting these discretized functions. The best way to do this is to use a general interconnection algorithm for S-parameters \cite{filipsson_new_1981,subnetwork_growth}. We briefly go over this here since it will play a part in estimating the decay rates of resonant modes in our circuit.
+
+\begin{figure}[h!]
+    \centering
+    \begin{circuitikz}[line width=1pt]
+    \ctikzset{bipoles/thickness=1, bipoles/length=1cm}
+    \ctikzset{bipoles/crossing/size=0.5}
+    \ctikzset { label/align = straight }
+
+    % -------------------------------- S1 Network -------------------------------- %
+    \draw[rounded corners=.5cm] (0,2) -- (0,4.5) -- (4.5,4.5) -- (4.5,0) -- (0,0) -- (0,2);
+    \node at (2.25,2.25) {\LARGE $\vb{S}_1$};
+
+    % Left Ports
+    \draw (0,0.5) to[short, -o] (-0.5,0.5);
+    \draw (0,1.5) to[short, -o] (-0.5,1.5);
+    \draw (0,3) to[short, -o] (-0.5,3);
+    \draw (0,4) to[short, -o] (-0.5,4);
+    \node at (-0.25,2.35) {$\vdots$};
+
+    % Center Port
+    \draw (4.5,2.75) to[short, -o] (6,2.75) -- (7.5,2.75);
+    \draw (4.5,1.75) to[short, -o] (6,1.75) -- (7.5,1.75);
+
+    % -------------------------------- S2 Network -------------------------------- %
+    \draw[rounded corners=.5cm] (7.5,2) -- (7.5,4.5) -- (12,4.5) -- (12,0) -- (7.5,0) -- (7.5,2);
+    \node at (9.75,2.25) {\LARGE $\vb{S}_2$};
+
+    % Right Ports
+    \draw (12,0.5) to[short, -o] (12.5,0.5);
+    \draw (12,1.5) to[short, -o] (12.5,1.5);
+    \draw (12,3) to[short, -o] (12.5,3);
+    \draw (12,4) to[short, -o] (12.5,4);
+    \node at (12.25,2.35) {$\vdots$};
+
+    % ------------------------------ Voltage Labels ------------------------------ %
+    \draw [-stealth](4.75, 3) -- (5.75, 3);
+    \node at (5.25,3.4) {$V_k^-$};
+    \draw [-stealth](6.25, 3) -- (7.25, 3);
+    \node at (6.75,3.4) {$V_\ell^+$};
+    \draw [stealth-](4.75, 1.5) -- (5.75, 1.5);
+    \node at (5.25,1.1) {$V_k^+$};
+    \draw [stealth-](6.25, 1.5) -- (7.25, 1.5);
+    \node at (6.75,1.1) {$V_\ell^-$};
+
+\end{circuitikz}
+\caption{An interconnection of two S-parameters that shows how the incident and reflected voltages at the interconnected ports are constrained. We can see that for the two ports $k$ and $\ell$, $V_k^-=V_\ell^+$ and $V_k^+=V_\ell^-$.}
+\label{fig:s_interconnect_visual}
+\end{figure}
+
+Consider the two S-parameters interconnected at a single port in Fig.\ \ref{fig:s_interconnect_visual}. The S-parameter of the disjoint networks is defined by a new S-parameter such that:
+\begin{equation}\label{eq:disjoint_s_params}
+    \vb{V}^- = \vb{S} \vb{V}^+ = \mqty(\vb{S}_1 & \vb{0} \\ \vb{0} & \vb{S}_2) \vb{V}^+
+\end{equation}
+Interconnecting the networks at port $k$ of $\vb{S}_1$ and port $\ell$ of $\vb{S}_2$ places the following constraint on the incident and reflected voltages at those ports:
+\begin{align*}
+    V_k^- &= V_\ell^+ \\
+    V_k^+ &= V_\ell^-
+\end{align*}
+Inserting this constraint into (\ref{eq:disjoint_s_params}) allows one to solve for the matrix elements of the interconnected S-parameter to obtain \cite{filipsson_new_1981}:
+\begin{equation}
+    S^{\text{int}}_{ij} = S_{ij} + \frac{S_{i\ell}S_{kj}(1-S_{\ell k}) + S_{i\ell}S_{kk}S_{\ell j} + S_{ik}S_{\ell j}(1 - S_{k \ell}) + S_{ik}S_{\ell \ell}S_{kj}}{1 - S_{k\ell} - S_{\ell k} + S_{k\ell}S_{\ell k} - S_{kk}S_{\ell\ell}}
+\end{equation} 
+
+This process will work for interconnecting two ports belonging to any general S-parameter. To connect the two ports of disconnected S-parameters, you can construct a larger S-parameter that represents the disconnected network and then apply the above formula.

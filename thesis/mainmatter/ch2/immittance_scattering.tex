@@ -1,0 +1,101 @@
+\section{Immittance and Scattering Response of Multiport Networks}
+
+In the following, we will be concerned with causal linear time-invariant (LTI) networks and their descriptions as used in \cite{passive_macromodeling, newcomb}. These networks are defined by the following properties:
+\begin{itemize}
+    \item {\bf\textit{Linearity}}: Linear combinations of inputs yield the same linear combinations for the output. Consider a set of signals $\vb{a}_i(t)$ with corresponding outputs $\vb{b}_i(t)$. For an input $\vb{a}(t) = \sum_i \alpha_i \vb{a}_i(t)$, the corresponding output will be $\vb{b}(t) = \sum_i \alpha_i \vb{b}_i(t)$.
+    \item {\bf\textit{Time-Invariance}}: A time shift in the input results in the same time shift at the output. If you have an input $\vb{a}(t)$ with a known output $\vb{b}(t)$, you immediately know that for an input $\vb{a}(t-t_0)$, the output will be $\vb{b}(t-t_0)$.
+    \item {\bf\textit{Causality}}: The output of the system only depends on the current and past inputs. In other words, the output at a given time $\vb{b}(t_0)$ will only be a function of $\vb{a}(t), \forall t \leq t_0$.
+\end{itemize}
+A multiple-input multiple-output (MIMO) system, can be described by the following input-output relation:
+\begin{equation}\label{eq:lti_system}
+    \vb{b}(t) = (\vb{h} \ast \vb{a})(t) = \int_{-\infty}^{+\infty} \vb{h}(t-\tau) \vb{a}(\tau)\; d\tau
+\end{equation}
+for some input vector $\vb{a}(t) \in \mathbb{R}^{n_a}$, output vector $\vb{b}(t) \in \mathbb{R}^{n_b}$ and an impulse response matrix $\vb{h}(t) \in \mathbb{R}^{n_b \times n_a}$. Note that for our electrical multiports, the number of inputs and outputs will be the equal so the impulse response matrix will be square. It is clear that (\ref{eq:lti_system}) describes an LTI system, but it does not enforce that the network is causal. This can be enforced by placing the following restriction on the impulse response vector:
+\begin{equation}
+    \vb{h}(t) = \vb{0},\quad \forall t < 0
+\end{equation}
+The above definitions allow us to describe multiport electrical networks using various impulse response functions. The most common representations of electrical multiport networks are the immittance (impedance and admittance) and scattering responses. Consider the general $N$-port electrical multiport structure pictured in Fig.\ \ref{fig:general_multiport}. The currents and voltages at the two-terminal ports can be related by the $N \times N$ impedance $\vb{z}(t)$ or admittance $\vb{y}(t)$ impulse response matrices such that:
+\begin{align}
+    \label{eq:z_time}\vb{v}(t) &= (\vb{z} \ast \vb{i})(t) \\
+    \label{eq:y_time}\vb{i}(t) &= (\vb{y} \ast \vb{v})(t)
+\end{align}
+Alternatively, we can relate the incident ($\vb{v^+}$) and reflected ($\vb{v^-}$) voltage waves at the ports using the scattering response (the S-parameter can also be defined in terms of power waves; for more on this see \cite[Chapter 2.6.3]{passive_macromodeling} \cite[Chapter 4.3]{Pozar_2011}):
+\begin{align}
+    \label{eq:s_time}\vb{v^-}(t) &= (\vb{s} \ast \vb{v^+})(t)
+\end{align}
+
+\begin{figure}[h!]
+    \centering
+    \begin{circuitikz}[line width=1pt]
+        \ctikzset{american}
+        \ctikzset{bipoles/thickness=1, bipoles/length=1cm}
+        \ctikzset { label/align = straight }
+        
+        % -------------------------------- Network Box ------------------------------- %
+        \draw[rounded corners=.5cm] (0,2) -- (0,4.5) -- (3,4.5) -- (3,0) -- (0,0) -- (0,2);
+        \node at (1.5,2.25) {$\vb{h}(t)$};
+
+        % -------------------------------- Lower Port -------------------------------- %
+        \draw (0,0.5) to[short, -o] (-1,0.5);
+        \draw (0,1.5) to[short, -o] (-1,1.5);
+        \node at (-.5,1) {$Z_N$};
+        
+        \draw [-stealth](-3.2, 1.2) -- (-1.2, 1.2);
+        \node at (-2.2,1.6) {$v_N^+, i_N^+$};
+        \draw [stealth-](-3.2, .8) -- (-1.2, .8);
+        \node at (-2.2,.4) {$v_N^-, -i_N^-$};
+
+        % -------------------------------- Upper Port -------------------------------- %
+        \draw (0,3) to[short, -o] (-1,3);
+        \draw (0,4) to[short, -o] (-1,4);
+        \node at (-.5,3.5) {$Z_1$};
+
+        \draw [-stealth](-3.2, 3.7) -- (-1.2, 3.7);
+        \node at (-2.2,4.1) {$v_1^+, i_1^+$};
+        \draw [stealth-](-3.2, 3.3) -- (-1.2, 3.3);
+        \node at (-2.2,2.9) {$v_1^-, -i_1^-$};
+
+        \node at (-0.5,2.35) {$\vdots$};
+
+    \end{circuitikz}
+    \caption{A general $N$-port network with incident and reflected voltage and current waves. Each port consists of a two-terminal pair. The network response can be described by the $N \times N$ matrix $\vb{h}(t)$ which can be an impedance, admittance or scattering impulse response. The impedance and admittance relate the port voltages $v_k=v_k^+ + v_k^-$ and port currents $i_k=i_k^+ - i_k^-$. Each port also has a characteristic impedance $Z_k$ defined through the relationship between the port voltages and currents: $ Z_k = v_k^+/i_k^+ = v_k^-/i_k^-$.}
+    \label{fig:general_multiport}
+\end{figure}
+
+In practice, when describing electrical multiports, the time-dependent impulse response matrices are not commonly used. Instead we look at the response matrices in the Laplace domain. This is defined by the bilateral Laplace transform
+\begin{equation}
+    X(s) = \int_{-\infty}^{\infty} x(t) e^{-st}\; dt
+\end{equation}
+with the complex frequency $s=\sigma + i\omega$. Under this transform, Eqs. (\ref{eq:z_time})-(\ref{eq:s_time}) become:
+\begin{align}
+    \label{eq:Z_s}\vb{V}(s) &= \vb{Z}(s)\vb{I}(s) \\
+    \label{eq:Y_s}\vb{I}(s) &= \vb{Y}(s)\vb{V}(s) \\
+    \label{eq:S_s}\vb{V}^-(s) &= \vb{S}(s)\vb{V}^+(s) 
+\end{align}
+When $\sigma=0$, we have $s=i\omega$ and in that case, the transformed impulse response functions $\vb{H}(i\omega)$ describe the AC response of the network (Fourier domain). The concept of complex frequency will be useful in understanding the form of these response functions. For example, the complex poles of an impedance function tell us about the resonant frequencies and decay rates of the resonant modes present in a circuit. 
+
+The matrix elements of the Z-parameter can be understood as the ratio between the voltage measured at a port $i$ while driving a current at port $j$ while all other ports are open-circuited:
+\begin{equation}
+    Z_{ij}(s) = \frac{V_i(s)}{I_j(s)}, \quad I_k(s)=0, \quad\forall k\neq j
+\end{equation}
+This also suggests that if one has an impedance parameter or function, ports can be ``left open'' by neglecting the corresponding row and column of the Z-parameter. The matrix elements of the Y-parameter have a similar definition but instead the ratio is defined between the current measured at one port while driving another port with a voltage while all other ports are short circuited. The matrix elements of the S-parameter are defined by the ratio between a measured reflected voltage wave and an incident voltage wave such that
+\begin{equation}
+    S_{jk} = \frac{V^-_i(s)}{V^+_j(s)}, \quad V^+_k(s)=0, \quad\forall k\neq j
+\end{equation}
+We can also convert between the Z, Y and S-parameters when needed. From equations (\ref{eq:Z_s}) and (\ref{eq:Y_s}) it is clear that $\vb{Z}(s)=\vb{Y}^{-1}(s)$. When the characteristic impedances of the ports are all $Z_0$, we can obtain the S-parameter from the Z-parameter using: $\vb{S}(s) = (\vb{Z}(s) + Z_0\mathds{1})^{-1} (\vb{Z}(s) - Z_0\mathds{1}) $. For more on these conversions and cases when the characteristic impedances of the ports are not all equal, see \cite[Chapter 4]{Pozar_2011}.
+
+For our circuit models, it will also be important to consider the following properties:
+\begin{enumerate}
+    \item {\bf \textit{Passivity}}: We can define an instantaneous power flow into a multiport using port voltages and currents:
+    \begin{equation}
+        p(t) = \vb{i}(t)^T \vb{v}(t)
+    \end{equation}
+    If $E(t)$ is the amount of energy stored in the network at a given time, a network will be passive if for all time intervals \cite[Chapter 9.1]{passive_macromodeling},
+    \begin{equation}\label{eq:passivity_condition}
+        E(t_1) \leq E(t_0) + \int_{t_0}^{t_1} p(t)\; dt
+    \end{equation}
+    \item {\bf \textit{Losslessness}}: A network will be lossless if (\ref{eq:passivity_condition}) holds with equality. The immittance matrices for lossless networks are always purely imaginary. Additionally, the scattering matrix of a lossless network will be unitary.
+    \item {\bf \textit{Reciprocity}}: Immittance or scattering responses will be symmetric for reciprocal systems: $\vb{H}(s)=\vb{H}^T(s)$. From the Reciprocity theorem \cite[Chapter 16.4]{desoer_kuh}, which is a consequence of Tellegen's thereom, an electrical circuit with only capacitors, inductors, ideal transformers and resistors will be reciprocal.
+\end{enumerate}
+
+In this thesis, we may use combinations of lumped and distributed elements to make models of superconducting circuits. Alternatively, the models may be generated by electromagnetic simulations. Either way, we will assume that the models are lossless. Our electromagnetic models will consist of superconducting (or perfectly conducting) thin films on a dielectric substrate to implement capacitive or inductive circuit elements. This is done so that we can characterize the ideal interactions between qubits in a given model. We will later on only be considering losses to the environment through the external ports of the system. Any other losses are assumed to be small (i.e. quasiparticle, two-level systems in dielectrics (TLS), and radiation loss \cite{disentangling_losses}). Furthermore, we will not be including any permanent magnetic elements in our electromagnetic models that could potentially be used in isolator or circulator components. This will result in reciprocal models that we can synthesize using capacitors, inductors, ideal transformers (and resistors when including loss to the environment) \cite{tellegen_gyrator}.
