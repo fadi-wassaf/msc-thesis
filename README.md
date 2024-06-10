@@ -1,6 +1,6 @@
 # msc-thesis
 
-This repository contains the TeX source and code used for my [master's thesis](./thesis/main.pdf) titled "Efficiently Building and Characterizing Electromagnetic Models of Multi-Qubit Superconducting Circuits" that was completed at RWTH Aachen University.
+This repository contains the TeX source and code used for my master's thesis ([arXiv:2406.04351](https://arxiv.org/abs/2406.04351)) titled "Efficiently Building and Characterizing Electromagnetic Models of Multi-Qubit Superconducting Circuits" that was completed at RWTH Aachen University.
 
 ## Python Setup
 To run any of the examples in `analysis/`, or to use any of the methods implemented in `src/tools/`, install the local package using pip. I recommend doing this within a virtial environment.
@@ -19,4 +19,4 @@ pip install -e .
    - Lossless reciprocal vector fitting
    - Z/S-parameter grid builder
    - Transmon network analysis
- - `thesis/` : TeX source for the thesis document
+ - `thesis/` : TeX source and [PDF](./thesis/main.pdf) for the thesis document
