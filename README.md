@@ -19,4 +19,4 @@ pip install -e .
    - Lossless reciprocal vector fitting
    - Z/S-parameter grid builder
    - Transmon network analysis
- - `thesis/` : TeX source and [PDF](./thesis/main.pdf) for the thesis document
+ - `thesis/` : TeX source, [thesis PDF](./thesis/main.pdf), and [poster](./thesis/msc_thesis_poster.pdf)
